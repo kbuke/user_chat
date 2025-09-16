@@ -16,7 +16,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_serializer import SerializerMixin
 
 
-class User(db.Model, SerializerMixin):
+class UserModel(db.Model, SerializerMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key = True)
@@ -25,6 +25,32 @@ class User(db.Model, SerializerMixin):
     profile_picture = db.Column(db.String)
     allow_all_messages = db.Column(db.Boolean)
     _password_hash = db.Column(db.String, nullable = False)
+
+    # RELATIONS
+    # followers - a user can have many followers, and a follower can follow many users
+    followers = db.relationship(
+        "FollowerModel", 
+        foreign_keys="FollowerModel.user_id", 
+        backref = "followed_user", 
+        cascade="all, delete-orphan"
+    )
+
+    # following - a follower can follow many users, and a user can have many followers
+    following = db.relationship(
+        "FollowerModel",
+        foreign_keys = "FollowerModel.follower_id",
+        backref = "following_user",
+        cascade = "all, delete-orphan"
+    )
+
+    # SERIALIZE RULES
+    serialize_rules = (
+        "-followers.followed_user",
+        "-followers.following_user",
+        
+        "-following.followed_user",
+        "-following.following_user",
+    )
 
     # hash the password
     @hybrid_property
@@ -49,7 +75,7 @@ class User(db.Model, SerializerMixin):
             raise ValueError("Please enter a valid username")
         
         new_username = value if key == "username" else self.username
-        existing_name = User.query.filter(User.username == new_username).first()
+        existing_name = UserModel.query.filter(UserModel.username == new_username).first()
         if existing_name and existing_name.id != self.id:
             raise ValueError(f"{value} is already registered")
         
@@ -72,22 +98,3 @@ class User(db.Model, SerializerMixin):
                 value = "https://img.freepik.com/free-photo/androgynous-avatar-non-binary-queer-person_23-2151100270.jpg"
         
         return value
-        # else:
-        #     user_gender = value
-
-        # user_gender = value if key == "gender" else self.gender
-        # user_picture = value if key == "profile_picture" else self.profile_picture
-
-        # breakpoint()
-
-        # if not user_gender in allowed_genders:
-        #     raise ValueError("Users gender must either be Male, Female or Other")
-        
-        # if user_picture is None or user_picture == "":
-        #     if user_gender == "Male":
-        #         user_picture == "https://static.vecteezy.com/system/resources/previews/024/183/525/non_2x/avatar-of-a-man-portrait-of-a-young-guy-illustration-of-male-character-in-modern-color-style-vector.jpg"
-        #     elif user_gender == "Female":
-        #         user_picture == "https://t4.ftcdn.net/jpg/11/66/06/77/360_F_1166067709_2SooAuPWXp20XkGev7oOT7nuK1VThCsN.jpg"
-        #     else:
-        #         user_gender == "https://img.freepik.com/free-photo/androgynous-avatar-non-binary-queer-person_23-2151100270.jpg"
-              
