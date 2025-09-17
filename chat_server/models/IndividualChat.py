@@ -19,9 +19,19 @@ class IndividualChatModel(db.Model, SerializerMixin):
         UniqueConstraint("user_id", "other_user_id", name = "unique_chat_pair"),
     )
 
+    # RELATIONS
+    messages = db.relationship(
+        "MessageModel",
+        back_populates = "chat",
+        cascade = "all, delete-orphan"
+    )
+
     serialize_rules = (
         "-starter",
         "-receiver",
+
+        "-messages.chat",
+        "-messages.user",
     )
 
     # VALIDATIONS

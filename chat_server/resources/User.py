@@ -28,6 +28,13 @@ class UserList(Resource):
             return {"error": [str(e)]}, 400
 
 class User(Resource):
+    def get(self, id):
+        user = UserModel.query.filter(UserModel.id == id).first()
+        if user:
+            return user.to_dict(), 201
+        else:
+            return{"error": f"User {id} not registered."}, 404
+        
     def delete(self, id):
         user = UserModel.query.filter(UserModel.id == id).first()
         if user:

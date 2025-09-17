@@ -59,3 +59,5 @@ class FollowerModel(db.Model, SerializerMixin):
         # 3 - If value is false the request is rejected.
         if value is False:
             raise ValueError("The follow request was rejected.")
+        
+        return value

@@ -23,3 +23,13 @@ class FollowersList(Resource):
             return {"message": "Follower added."}
         except ValueError as e:
             return {"error": [str(e)]}
+
+class Follower(Resource):
+    def delete(self, id):
+        follow = FollowerModel.query.filter(FollowerModel.id == id).first()
+        if follow:
+            db.session.delete(follow)
+            db.session.commit()
+            return {"message": f"Follow relationship {id} deleted"}, 201
+        else:
+            return {"error": f"No follow relationship {id} registered here"}, 404

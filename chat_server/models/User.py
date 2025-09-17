@@ -11,9 +11,11 @@
         # Followers and Following
 
 from config import db, bcrypt
+from sqlalchemy import or_
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_serializer import SerializerMixin
+# from models.IndividualChat import IndividualChatModel
 
 
 class UserModel(db.Model, SerializerMixin):
@@ -63,7 +65,19 @@ class UserModel(db.Model, SerializerMixin):
     # get all individual chats regardless of the role
     @property
     def individual_chats(self):
-        return self.chat_started + self.chats_received
+        from models.IndividualChat import IndividualChatModel
+        return IndividualChatModel.query.filter(
+            (IndividualChatModel.user_id == self.id) |
+            (IndividualChatModel.other_user_id == self.id)
+        ).all()
+    
+    # messages
+    messages = db.relationship(
+        "MessageModel", 
+        back_populates = "user",
+        cascade = "all, delete-orphan"
+    )
+
 
     # SERIALIZE RULES
     serialize_rules = (
@@ -72,6 +86,14 @@ class UserModel(db.Model, SerializerMixin):
 
         "-following.followed_user",
         "-following.following_user",
+
+        "-chat_started",
+
+        "-chats_received",
+
+        "individual_chats",
+
+        "-messages.user",
     )
 
     # hash the password

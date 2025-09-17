@@ -22,6 +22,13 @@ class IndividualChatList(Resource):
             return {"error": [str(e)]}
 
 class IndividualChat(Resource):
+    def get(self, id):
+        chat = IndividualChatModel.query.filter(IndividualChatModel.id == id).first()
+        if chat:
+            return chat.to_dict(), 201
+        else:
+            return {"error": f"Chat {id} not found"}, 404
+        
     def delete(self, id):
         chat = IndividualChatModel.query.filter(IndividualChatModel.id == id).first()
         if chat:
