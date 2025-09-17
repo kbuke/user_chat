@@ -26,3 +26,13 @@ class UserList(Resource):
             return {"message": "New User Registered"}, 201
         except ValueError as e:
             return {"error": [str(e)]}, 400
+
+class User(Resource):
+    def delete(self, id):
+        user = UserModel.query.filter(UserModel.id == id).first()
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return {"message": f"User {id} deleted"}, 201
+        else:
+            return {"error": f"User {id} not found"}, 404

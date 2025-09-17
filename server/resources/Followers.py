@@ -16,7 +16,7 @@ class FollowersList(Resource):
             new_follower = FollowerModel(
                 follower_id = json.get("followerId"),
                 user_id = json.get("userId"),
-                accepted = json.get("followAccepted")
+                accepted = json.get("followerAccepted")
             )
             db.session.add(new_follower)
             db.session.commit()

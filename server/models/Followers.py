@@ -15,7 +15,7 @@ class FollowerModel(db.Model, SerializerMixin):
 
     @validates("follower_id", "user_id")
     def validate_user_ids(self, key, value):
-        
+
         # 1 - ID must be an integer
         if not isinstance(value, int):
             try:
@@ -47,3 +47,15 @@ class FollowerModel(db.Model, SerializerMixin):
                 raise ValueError("This follow relationship already exists")
             
         return value
+    
+    @validates("accepted")
+    def validate_follow_request(self, key, value):
+        # 1 - Check the logged in user is the user who's been sent a follow request
+
+        # 2 - Check the value is a boolean
+        if not isinstance(value, bool):
+            raise ValueError("Value of accept must be a boolean")
+        
+        # 3 - If value is false the request is rejected.
+        if value is False:
+            raise ValueError("The follow request was rejected.")

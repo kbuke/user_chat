@@ -30,9 +30,9 @@ class UserModel(db.Model, SerializerMixin):
     # followers - a user can have many followers, and a follower can follow many users
     followers = db.relationship(
         "FollowerModel", 
-        foreign_keys="FollowerModel.user_id", 
+        foreign_keys = "FollowerModel.user_id", 
         backref = "followed_user", 
-        cascade="all, delete-orphan"
+        cascade = "all, delete-orphan"
     )
 
     # following - a follower can follow many users, and a user can have many followers
@@ -43,11 +43,33 @@ class UserModel(db.Model, SerializerMixin):
         cascade = "all, delete-orphan"
     )
 
+    # individual chats - who initiated the chat
+    chat_started = db.relationship(
+        "IndividualChatModel",
+        foreign_keys = "IndividualChatModel.user_id",
+        backref = "starter",
+        cascade = "all, delete-orphan"
+    )
+
+    # individual chats - who received first message
+    chats_received = db.relationship(
+        "IndividualChatModel",
+        foreign_keys = "IndividualChatModel.other_user_id",
+        backref = "receiver",
+        cascade = "all, delete-orphan"
+    )
+
+    # HYBRID PROPERTY
+    # get all individual chats regardless of the role
+    @property
+    def individual_chats(self):
+        return self.chat_started + self.chats_received
+
     # SERIALIZE RULES
     serialize_rules = (
         "-followers.followed_user",
         "-followers.following_user",
-        
+
         "-following.followed_user",
         "-following.following_user",
     )
